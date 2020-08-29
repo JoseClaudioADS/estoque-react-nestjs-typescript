@@ -1,1 +1,1 @@
-docker run --name mysql-estoque -e MYSQL_DATABASE=estoque -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:latest
+docker run --name estoque-db -e POSTGRES_PASSWORD=docker -e POSTGRES_DB=estoque -p 5432:5432 -d postgres

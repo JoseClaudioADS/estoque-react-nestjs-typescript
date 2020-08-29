@@ -4,6 +4,8 @@ import SignUp from './components/signup';
 import SignIn from './components/signin';
 import Home from './components/home';
 import { AuthContext } from './contexts/AuthContext';
+import Items from './components/items';
+import EditItem from './components/items/edit';
 
 interface CustomRouteProps {
   isPrivate?: boolean;
@@ -39,6 +41,15 @@ const Routes: React.SFC<RoutesProps> = () => {
         </CustomRoute>
         <CustomRoute path="/signin">
           <SignIn />
+        </CustomRoute>
+        <CustomRoute path="/items" isPrivate exact>
+          <Items />
+        </CustomRoute>
+        <CustomRoute path="/items/add" isPrivate>
+          <EditItem />
+        </CustomRoute>
+        <CustomRoute path="/items/edit" isPrivate>
+          <EditItem />
         </CustomRoute>
       </Switch>
     </>
