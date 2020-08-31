@@ -43,6 +43,10 @@ const Items: React.SFC<ItemsProps> = () => {
     [items]
   );
 
+  const handleEdit = useCallback((id: string) => {
+    history.push(`/items/${id}/edit`);
+  }, []);
+
   return (
     <>
       <h1>Itens</h1>
@@ -74,7 +78,7 @@ const Items: React.SFC<ItemsProps> = () => {
                 <td>
                   <EditButton
                     className="pure-button"
-                    onClick={() => handleDestroy(item.id)}
+                    onClick={() => handleEdit(item.id)}
                   >
                     Editar
                   </EditButton>

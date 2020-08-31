@@ -48,7 +48,7 @@ const Routes: React.SFC<RoutesProps> = () => {
         <CustomRoute path="/items/add" isPrivate>
           <EditItem />
         </CustomRoute>
-        <CustomRoute path="/items/edit" isPrivate>
+        <CustomRoute path="/items/:id/edit" isPrivate>
           <EditItem />
         </CustomRoute>
       </Switch>

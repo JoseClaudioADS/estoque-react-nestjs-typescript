@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import { ToastContainer, toast } from 'react-toastify';
 import FieldError from '../../../common/components/fielderror';
 import api from '../../../services/api';
 import history from '../../../services/history';
+import { useParams } from 'react-router-dom';
 
 export interface EditItemProps {}
 
@@ -13,18 +14,43 @@ const schema = Yup.object().shape({
   expirationDate: Yup.date().required().typeError('Data de validade incorreta'),
 });
 
+class ItemState {
+  name = '';
+  expirationDate = new Date();
+}
+
+interface RouteParams {
+  id: string;
+}
+
 const EditItem: React.SFC<EditItemProps> = () => {
-  const [name, setName] = useState('');
-  const [expirationDate, setExpirationDate] = useState(new Date());
+  const [item, setItem] = useState(new ItemState());
   const [errors, setErrors] = useState(new Array<any>());
+
+  const { id } = useParams<RouteParams>();
+
+  useEffect(() => {
+    async function getItem(id: string) {
+      const { data } = await api.get(`/items/${id}`);
+
+      setItem({
+        name: data.name,
+        expirationDate: new Date(data.expirationDate),
+      });
+    }
+
+    if (id) {
+      getItem(id);
+    }
+  }, [id]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
-      const item = { name, expirationDate };
       await schema.validate(item, { abortEarly: false });
-      await api.post('/items', item);
-      toast.success('Item cadastrado com sucesso.');
+      if (id) await api.put(`/items/${id}`, item);
+      else await api.post('/items', item);
+      toast.success(`Item ${id ? 'editado' : 'cadastrado'} com sucesso.`);
       history.push('/items');
     } catch (e) {
       if (e instanceof Yup.ValidationError) {
@@ -37,6 +63,20 @@ const EditItem: React.SFC<EditItemProps> = () => {
     }
   }
 
+  const onInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = event.target;
+
+      setItem((prevItem) => {
+        return {
+          ...prevItem,
+          [name]: value,
+        };
+      });
+    },
+    []
+  );
+
   return (
     <form
       className="pure-form pure-form-stacked"
@@ -44,27 +84,28 @@ const EditItem: React.SFC<EditItemProps> = () => {
       noValidate
     >
       <fieldset>
-        <legend>Novo item</legend>
+        <legend>{id ? 'Editar' : 'Novo'} item</legend>
         <label htmlFor="name">Nome</label>
         <input
           type="text"
           id="name"
           name="name"
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
+          value={item.name}
+          onChange={onInputChange}
         />
         <FieldError field="name" errors={errors}></FieldError>
         <label htmlFor="expirationDate">Data de validade</label>
         <DatePicker
           dateFormat="dd/MM/yyyy"
-          selected={expirationDate}
-          onChange={(date) => setExpirationDate(date as Date)}
+          selected={item.expirationDate}
+          name="expirationDate"
+          onChange={() => {}}
+          onChangeRaw={onInputChange}
         />{' '}
         <FieldError field="expirationDate" errors={errors}></FieldError>
         <br></br>
         <button type="submit" className="pure-button pure-button-primary">
-          Cadastrar
+          {id ? 'Salvar' : 'Cadastrar'}
         </button>
       </fieldset>
       <ToastContainer />
